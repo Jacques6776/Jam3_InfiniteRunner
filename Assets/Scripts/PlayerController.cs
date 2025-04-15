@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -71,6 +72,21 @@ public class PlayerController : MonoBehaviour
             GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
         }
 
-        #endregion
+        #endregion        
+
     }
+
+    #region COLLISIONS
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.tag == "Obstacle")
+        {
+            Destroy(gameObject);
+
+            LevelManager.Instance.GameOver();
+        }
+    }
+
+    #endregion
 }
