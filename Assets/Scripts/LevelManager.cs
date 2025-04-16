@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LevelManager : MonoBehaviour
 {
@@ -22,6 +23,9 @@ public class LevelManager : MonoBehaviour
 
     public bool isPlaying = false;
 
+    public UnityEvent onPlay = new UnityEvent();
+    public UnityEvent onGameOver = new UnityEvent();
+
     [SerializeField] private TextMeshProUGUI scoreText;
 
     private void Update()
@@ -30,15 +34,17 @@ public class LevelManager : MonoBehaviour
         {
             currentGameScore += Time.deltaTime;
         }
+    }
 
-        if (Input.GetKeyDown("r"))
-        {
-            isPlaying = true;
-        }
+    public void StartGame()
+    {
+        onPlay.Invoke();
+        isPlaying = true;
     }
 
     public void GameOver()
     {
+        onGameOver.Invoke();
         currentGameScore = 0;
         isPlaying = false;
     }

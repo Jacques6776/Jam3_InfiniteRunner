@@ -22,6 +22,11 @@ public class PlayerController : MonoBehaviour
     public bool isGrounded = false;
     public bool isJumping = false;
 
+    private void Start()
+    {
+        LevelManager.Instance.onPlay.AddListener(ActivatePlayer);
+    }
+
     private void Update()
     {
         isGrounded = Physics2D.OverlapCircle(groundChecker.position, groundCheckRadius, groundLayer);
@@ -76,13 +81,18 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void ActivatePlayer()
+    {
+        gameObject.SetActive (true);
+    }
+
     #region COLLISIONS
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.transform.tag == "Obstacle")
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
 
             LevelManager.Instance.GameOver();
         }
