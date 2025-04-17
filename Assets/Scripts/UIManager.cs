@@ -2,10 +2,13 @@ using UnityEngine;
 using TMPro;
 
 public class UIManager : MonoBehaviour
-{
-    [SerializeField] private TextMeshProUGUI scoreText;
+{    
     [SerializeField] private GameObject startMenuUI;
     [SerializeField] private GameObject gameOverUI;
+
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI gameOverScore;
+    [SerializeField] private TextMeshProUGUI gameOverHighscore;
 
     LevelManager levelManager;
 
@@ -28,6 +31,9 @@ public class UIManager : MonoBehaviour
     public void ActivateGameOverUI()
     {
         gameOverUI.SetActive(true);
+
+        gameOverScore.text = "Score: " + levelManager.VisualGameScore();
+        gameOverHighscore.text = "Highscore: " + levelManager.VisualGameHighscore();
     }
 
     private void ScoreTextDisplay()
