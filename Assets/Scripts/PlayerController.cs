@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,77 +9,72 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody2D playerRB;
     [SerializeField] private Transform GFX;
 
+    public bool isGrounded = false;
+
     [Header("Jump Controls")]
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private LayerMask groundLayer;    
     [SerializeField] private Transform groundChecker;
     [SerializeField] private float groundCheckRadius = 0.2f;
-    [SerializeField] private float jumpTime = 0.3f;
-    private float jumpTimer;
+    //[SerializeField] private float jumpTime = 0.3f;
+    //private float jumpTimer;
+    public bool isJumping = false;
+    public bool doubleJump = false;
 
     [Header("Crouch Controls")]
     [SerializeField] private float crouchHeight = 0.5f;
+    public bool isCrawling = false;
 
-    public bool isGrounded = false;
-    public bool isJumping = false;
+    //Input actions
+    private PlayerInputMap input = null;
+    [SerializeField] PlayerInputMap playerInputs;
+
+    private void Awake()
+    {
+        input = new PlayerInputMap();
+    }
 
     private void Start()
     {
         LevelManager.Instance.onPlay.AddListener(ActivatePlayer);
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        isGrounded = Physics2D.OverlapCircle(groundChecker.position, groundCheckRadius, groundLayer);
+        input.Enable();
 
-        #region JUMPING
+        input.Player.Crawl.performed += PlayerCrawlEnabled;
+        input.Player.Crawl.canceled += PlayerCrawlDisabled;
+    }
 
-        if (isGrounded && Input.GetButtonDown("Jump"))
-        {
-            isJumping = true;
-            playerRB.linearVelocity = Vector2.up * jumpForce;
-        }
+    private void OnDisable()
+    {
+        input.Disable();
+    }
 
-        if (isJumping && Input.GetButton("Jump"))
-        { 
-            if (jumpTimer < jumpTime)
-            {
-                playerRB.linearVelocity = Vector2.up * jumpForce;
+    private void FixedUpdate()
+    {
+        isGrounded = GroundChecker();
 
-                jumpTimer += Time.deltaTime;
-            }
-            else
-            {
-                isJumping = false;
-            }
-        }
+        //if (isGrounded)
+        //{
+        //    isJumping = false;
+        //    doubleJump = false;
+        //}
+        
+        //if (isGrounded && Input.GetButton ("Crouch"))
+        //{
+        //    GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z); //shrinks the sprite, will remove once animation is in
 
-        if (Input.GetButtonUp ("Jump"))
-        {
-            isJumping = false;
-            jumpTimer = 0f;
-        }
-
-        #endregion
-
-        #region CROUCHING
-
-        if (isGrounded && Input.GetButton ("Crouch"))
-        {
-            GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z);
-
-            if (isJumping)
-            {
-                GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
-            }
-        }
-        if (Input.GetButtonUp ("Crouch"))
-        {
-            GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
-        }
-
-        #endregion        
-
+        //    if (isJumping)
+        //    {
+        //        GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
+        //    }
+        //}
+        //if (Input.GetButtonUp ("Crouch"))
+        //{
+        //    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
+        //}
     }
 
     private void ActivatePlayer()
@@ -86,7 +82,67 @@ public class PlayerController : MonoBehaviour
         gameObject.SetActive (true);
     }
 
-    #region COLLISIONS
+    private bool GroundChecker()
+    {
+        if (playerRB.linearVelocity.y <= 0)
+        {
+            Collider2D collider = Physics2D.OverlapCircle(groundChecker.position, groundCheckRadius, groundLayer);
+            if (collider != gameObject)
+            {
+                return true;
+            }            
+        }
+        return false;
+    }
+
+    //jump controls
+    public void PlayerJumping(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (isGrounded)
+            {
+                isJumping = true;
+                playerRB.linearVelocity = Vector2.up * jumpForce;
+            }
+            else if (isJumping && !doubleJump)
+            {
+                doubleJump = true;
+                playerRB.linearVelocity = Vector2.up * jumpForce;
+            }            
+        }
+    }
+
+    //crawl controls
+    private void PlayerCrawlEnabled(InputAction.CallbackContext context)
+    {
+        isCrawling = true;
+    }
+
+    private void PlayerCrawlDisabled(InputAction.CallbackContext context)
+    {
+        isCrawling = false;
+    }
+
+    public void PlayerCrawl(InputAction.CallbackContext context)
+    {
+        if (context.performed && isGrounded)
+        {
+            if (isCrawling)
+            {
+                GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z); //shrinks the sprite, will remove once animation is in
+
+                if (isJumping)
+                {
+                    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Scales with be set to animations
+                }
+            }
+            //else 
+            //{
+            //    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z);
+            //}            
+        }
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -97,6 +153,4 @@ public class PlayerController : MonoBehaviour
             LevelManager.Instance.GameOver();
         }
     }
-
-    #endregion
 }
