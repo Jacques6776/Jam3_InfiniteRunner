@@ -13,17 +13,24 @@ public class PlayerController : MonoBehaviour
 
     [Header("Jump Controls")]
     [SerializeField] private float jumpForce = 10f;
-    [SerializeField] private LayerMask groundLayer;    
-    [SerializeField] private Transform groundChecker;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    //[SerializeField] private float jumpTime = 0.3f;
-    //private float jumpTimer;
     public bool isJumping = false;
     public bool doubleJump = false;
 
     [Header("Crouch Controls")]
     [SerializeField] private float crouchHeight = 0.5f;
     public bool isCrawling = false;
+
+    [Header("Charge Controls")]
+    public bool canCharge = false;
+    [SerializeField] bool isCharging = false;
+
+    public Transform chargeEndPosition;
+    public Transform resetChargePosition;
+        
+    [SerializeField] private float currentChargeSpeed;
+    [SerializeField] private float forwardChargeSpeed = 5f;
+    [SerializeField] private float retreatChargeSpeed = 3f;
+
 
     //Input actions
     private PlayerInputMap input = null;
@@ -54,27 +61,51 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        isGrounded = GroundChecker();
+        if (isGrounded)
+        {
+            isJumping = false;
+            doubleJump = false;
+        }
+        else
+        {
+            isJumping = true;
+        }
 
-        //if (isGrounded)
-        //{
-        //    isJumping = false;
-        //    doubleJump = false;
-        //}
-        
-        //if (isGrounded && Input.GetButton ("Crouch"))
-        //{
-        //    GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z); //shrinks the sprite, will remove once animation is in
+        if (isCrawling)
+        {
+            if (isJumping)
+            {
+                return;
+            }
+            else
+            {
+                PlayerIsCrawling();
+            }
+        }
+        else
+        {
+            PlayerIsNotCrawling();
+        }
 
-        //    if (isJumping)
-        //    {
-        //        GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
-        //    }
-        //}
-        //if (Input.GetButtonUp ("Crouch"))
-        //{
-        //    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Want to strade out the one for a saved initial scale
-        //}
+        if(isCharging) // needs to know it should now prioritise point 2
+        {
+            currentChargeSpeed = forwardChargeSpeed;
+            transform.position = Vector2.MoveTowards(transform.position, chargeEndPosition.position, Time.deltaTime * currentChargeSpeed);
+
+            if (transform.position == chargeEndPosition.position)
+            {
+                currentChargeSpeed = retreatChargeSpeed;
+                transform.position = Vector2.MoveTowards(transform.position, resetChargePosition.position, Time.deltaTime * currentChargeSpeed);
+
+                if (transform.position == resetChargePosition.position)
+                {
+                    Debug.Log("Too far");
+                    isCharging = false;
+                    canCharge = false;
+                    //return;
+                }
+            }
+        }
     }
 
     private void ActivatePlayer()
@@ -82,21 +113,8 @@ public class PlayerController : MonoBehaviour
         gameObject.SetActive (true);
     }
 
-    private bool GroundChecker()
-    {
-        if (playerRB.linearVelocity.y <= 0)
-        {
-            Collider2D collider = Physics2D.OverlapCircle(groundChecker.position, groundCheckRadius, groundLayer);
-            if (collider != gameObject)
-            {
-                return true;
-            }            
-        }
-        return false;
-    }
-
     //jump controls
-    public void PlayerJumping(InputAction.CallbackContext context)
+    public void PlayerJumpingSwitch(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
@@ -124,23 +142,33 @@ public class PlayerController : MonoBehaviour
         isCrawling = false;
     }
 
-    public void PlayerCrawl(InputAction.CallbackContext context)
+    public void PlayerCrawlSwitch(InputAction.CallbackContext context)
     {
         if (context.performed && isGrounded)
         {
-            if (isCrawling)
-            {
-                GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z); //shrinks the sprite, will remove once animation is in
+            Debug.Log("Is crawling");         
+        }
+    }
 
-                if (isJumping)
-                {
-                    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Scales with be set to animations
-                }
-            }
-            //else 
-            //{
-            //    GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z);
-            //}            
+    private void PlayerIsCrawling()
+    {
+        if (isJumping)
+        {
+            GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z); //Scales with be set to animations
+        }
+            GFX.localScale = new Vector3(GFX.localScale.x, crouchHeight, GFX.localScale.z);
+    }
+
+    private void PlayerIsNotCrawling()
+    {
+        GFX.localScale = new Vector3(GFX.localScale.x, 1f, GFX.localScale.z);
+    }
+
+    public void PlayerChargeAttackSwitch(InputAction.CallbackContext context)
+    {
+        if (canCharge && context.performed)
+        {            
+            isCharging = true;
         }
     }
 
@@ -151,6 +179,22 @@ public class PlayerController : MonoBehaviour
             gameObject.SetActive(false);
 
             LevelManager.Instance.GameOver();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 }

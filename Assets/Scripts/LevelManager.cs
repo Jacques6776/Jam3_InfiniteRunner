@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class LevelManager : MonoBehaviour
 {
@@ -32,6 +33,9 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI scoreText;
 
+    public GameObject playerObject;
+    private PlayerInput playerInput;
+
     private void Start()
     {
 
@@ -49,6 +53,8 @@ public class LevelManager : MonoBehaviour
         {
             gameData = new GameData();
         }
+
+        playerInput = playerObject.GetComponent<PlayerInput>();
     }
 
     private void Update()
@@ -64,6 +70,8 @@ public class LevelManager : MonoBehaviour
         onPlay.Invoke();
         isPlaying = true;
         currentGameScore = 0;
+
+        playerInput.enabled = true;
     }
 
     public void GameOver()
@@ -78,6 +86,8 @@ public class LevelManager : MonoBehaviour
             SaveSystem.Save("save", saveString);
         }
         isPlaying = false;
+
+        playerInput.enabled = false;
 
         //want game over invoke after other code
         onGameOver.Invoke();
