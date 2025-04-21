@@ -6,9 +6,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject startMenuUI;
     [SerializeField] private GameObject gameOverUI;
 
+    [Header("Game Scores")]
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI gameOverScore;
     [SerializeField] private TextMeshProUGUI gameOverHighscore;
+
+    [Header("Charge Tracker")]
+    [SerializeField] private TextMeshProUGUI chargeIndicatorText;
 
     LevelManager levelManager;
 
@@ -21,6 +25,7 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         ScoreTextDisplay();
+        ChargeVisualIndicator();
     }
 
     public void PlayButtonHandler()
@@ -39,5 +44,10 @@ public class UIManager : MonoBehaviour
     private void ScoreTextDisplay()
     {
         scoreText.text = levelManager.VisualGameScore();
+    }
+
+    private void ChargeVisualIndicator()
+    {
+        chargeIndicatorText.text = levelManager.VisualChargeTracker();
     }
 }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4751625941613078895}
   m_Layer: 3
   m_Name: Player
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -76,18 +76,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerRB: {fileID: 4612504800762168905}
-  GFX: {fileID: 7483845529546156708}
+  playerObject: {fileID: 7483845529546156708}
   isGrounded: 0
   jumpForce: 30
   isJumping: 0
   doubleJump: 0
   crouchHeight: 0.5
   isCrawling: 0
-  canCharge: 0
+  canCharge: 1
   isCharging: 0
-  forwardCharge: {fileID: 0}
-  resetCharge: {fileID: 0}
-  chargeSpeed: 3
+  resetCharge: 0
+  chargeEndPosition: {fileID: 0}
+  resetChargePosition: {fileID: 0}
+  currentChargeSpeed: 0
+  forwardChargeSpeed: 5
+  retreatChargeSpeed: 3
 --- !u!114 &4751625941613078895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,7 +120,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 955246887229423587}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: PlayerJumping
+        m_MethodName: PlayerJumpingSwitch
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -130,7 +133,19 @@ MonoBehaviour:
     m_ActionId: cad6854b-a2c5-4532-86ef-38ca41bf03e8
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 955246887229423587}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: PlayerChargeAttackSwitch
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 7fe54b30-61c5-445a-af58-8049f0cf1ef7
     m_ActionName: 'Player/Tackle[/Keyboard/shift]'
   - m_PersistentCalls:
@@ -164,7 +179,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7483845529546156708}
   - component: {fileID: 3943440397578349689}
-  - component: {fileID: 4816718400948933224}
+  - component: {fileID: 3981937750169857382}
   m_Layer: 3
   m_Name: PlayerSprite
   m_TagString: Player
@@ -242,7 +257,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &4816718400948933224
+--- !u!61 &3981937750169857382
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -300,7 +315,7 @@ GameObject:
   - component: {fileID: 3500326967143668927}
   m_Layer: 3
   m_Name: GroundCheck
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

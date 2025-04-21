@@ -20,25 +20,29 @@ public class LevelManager : MonoBehaviour
 
     #endregion
 
+    [Header ("Game Score Controls")]
     //Save system for scores. Creating a Serialized class (seperate script: Game Data)
-    public float currentGameScore = 0f;
-
+    public int currentGameScore;
     public GameData gameData; // this refers to the serialized class we made
+    [SerializeField] private TextMeshProUGUI scoreText;
 
+    [Header ("Game State Controls")]
     //Set to know when game is in play and when in game over states. WIll enable and disable objects as need that are listing to the singleton states
     public bool isPlaying = false;
-
     public UnityEvent onPlay = new UnityEvent();
     public UnityEvent onGameOver = new UnityEvent();
 
-    [SerializeField] private TextMeshProUGUI scoreText;
+    [Header("Charge Attack Tracker")]
+    [SerializeField] private int startingChargeScore = 0;
+    [SerializeField] private int activationChargeScore = 10;
+    [SerializeField] private int currentChargeScore;
 
     public GameObject playerObject;
     private PlayerInput playerInput;
+    public PlayerController playerController;
 
     private void Start()
     {
-
         //if we have data then it will load
         //if not it will create new data
 
@@ -55,13 +59,15 @@ public class LevelManager : MonoBehaviour
         }
 
         playerInput = playerObject.GetComponent<PlayerInput>();
+
+        playerController = FindFirstObjectByType<PlayerController>();
     }
 
     private void Update()
     {
-        if (isPlaying)
+        if (currentChargeScore == activationChargeScore)
         {
-            currentGameScore += Time.deltaTime;
+            EnablePlayerChargeAttack();
         }
     }
 
@@ -69,22 +75,16 @@ public class LevelManager : MonoBehaviour
     {
         onPlay.Invoke();
         isPlaying = true;
+
         currentGameScore = 0;
+
+        currentChargeScore = startingChargeScore;
 
         playerInput.enabled = true;
     }
 
     public void GameOver()
     {
-        //compares the highscore saved in gamedata class
-        if (gameData.highscore < currentGameScore)
-        {
-            gameData.highscore = currentGameScore;
-
-            //this will call to the save system to update the highscore and save it
-            string saveString = JsonUtility.ToJson(gameData); // converts the score into a json that can be saved by the game
-            SaveSystem.Save("save", saveString);
-        }
         isPlaying = false;
 
         playerInput.enabled = false;
@@ -93,14 +93,47 @@ public class LevelManager : MonoBehaviour
         onGameOver.Invoke();
     }
 
+    public void IncreaseGameScore(int points)
+    {
+        currentGameScore = currentGameScore + points;
+    }
+
+    //Charge score controlls
+    public void IncreaseChargeScore()
+    {
+        if (currentChargeScore < activationChargeScore)
+        {
+            currentChargeScore++;
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    public void ResetChargeScore()
+    {
+        currentChargeScore = startingChargeScore;
+    }
+
+    private bool EnablePlayerChargeAttack()
+    {
+        return playerController.canCharge = true;
+    }
+
     //Converts the timer score to a interget string
     public string VisualGameScore()
     {
-        return Mathf.RoundToInt(currentGameScore).ToString();
+        return currentGameScore.ToString();
     }
 
     public string VisualGameHighscore()
     {
         return Mathf.RoundToInt(gameData.highscore).ToString();
+    }
+
+    public string VisualChargeTracker()
+    {
+        return currentChargeScore.ToString();
     }
 }
