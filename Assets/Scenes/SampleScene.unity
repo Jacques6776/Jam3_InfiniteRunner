@@ -148,10 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed1b7df61d02cba40a158b00738fa8ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentGameScore: 0
-  gameData:
-    highscore: 0
+  startMenuUI: {fileID: 1167547261}
+  gameOverUI: {fileID: 1026396787}
   scoreText: {fileID: 1239905420}
+  gameOverScore: {fileID: 1142107002}
+  gameOverHighscore: {fileID: 1661233387}
+  chargeIndicatorText: {fileID: 191084091}
+  currentGameScore: 0
+  gameOverHighScore: 0
   isPlaying: 0
   onPlay:
     m_PersistentCalls:
@@ -164,6 +168,7 @@ MonoBehaviour:
   currentChargeScore: 0
   playerObject: {fileID: 468821380}
   playerController: {fileID: 0}
+  obstacleSpawnController: {fileID: 0}
 --- !u!4 &31601000
 Transform:
   m_ObjectHideFlags: 0
@@ -262,9 +267,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 512360631}
-        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: PlayButtonHandler
+      - m_Target: {fileID: 31600999}
+        m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
+        m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -960,57 +965,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5299468382688103528, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
   m_PrefabInstance: {fileID: 4834976019648609199}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &468821385 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1824334650104390836, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-  m_PrefabInstance: {fileID: 4834976019648609199}
-  m_PrefabAsset: {fileID: 0}
---- !u!61 &468821386
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 468821380}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
 --- !u!1 &512360626
 GameObject:
   m_ObjectHideFlags: 0
@@ -1023,7 +977,6 @@ GameObject:
   - component: {fileID: 512360630}
   - component: {fileID: 512360629}
   - component: {fileID: 512360628}
-  - component: {fileID: 512360631}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -1117,24 +1070,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &512360631
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 512360626}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 464848e9aa66e7240989c1b5665a2bd4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startMenuUI: {fileID: 1167547261}
-  gameOverUI: {fileID: 1026396787}
-  scoreText: {fileID: 1239905420}
-  gameOverScore: {fileID: 1142107002}
-  gameOverHighscore: {fileID: 1661233387}
-  chargeIndicatorText: {fileID: 191084091}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2732,9 +2667,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 512360631}
-        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: PlayButtonHandler
+      - m_Target: {fileID: 31600999}
+        m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
+        m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2845,6 +2780,8 @@ MonoBehaviour:
   obstacleSpeed: 5
   obstacleSpawnTimeFactor: 0.1
   obstacleSpeedFactor: 0.2
+  levelManager: {fileID: 0}
+  gameInProgress: 0
 --- !u!1 &1650678934
 GameObject:
   m_ObjectHideFlags: 0
@@ -3028,14 +2965,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 955246887229423587, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-      propertyPath: canCharge
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 955246887229423587, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-      propertyPath: playerObject
-      value: 
-      objectReference: {fileID: 468821385}
-    - target: {fileID: 955246887229423587, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
       propertyPath: chargeEndPosition
       value: 
       objectReference: {fileID: 1860277396}
@@ -3087,22 +3016,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5299468382688103528, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-      propertyPath: m_TagString
-      value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 5551719591620999339, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-      propertyPath: m_TagString
-      value: Untagged
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 3981937750169857382, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5299468382688103528, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 468821386}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec58b47c424e32e4cac9451c60802a6f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

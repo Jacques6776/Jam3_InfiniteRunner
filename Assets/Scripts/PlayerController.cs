@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        LevelManager.Instance.onPlay.AddListener(ActivatePlayer);
+        
     }
 
     private void OnEnable()
@@ -200,7 +200,7 @@ public class PlayerController : MonoBehaviour
         {
             gameObject.SetActive(false);
 
-            LevelManager.Instance.GameOver();
+            levelManager.GameOver();
         }
     }
 

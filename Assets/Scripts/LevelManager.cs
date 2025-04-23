@@ -4,27 +4,23 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 public class LevelManager : MonoBehaviour
-{
-    #region SINGLETON
+{    
+    [Header("Game Menus")]
+    [SerializeField] private GameObject startMenuUI;
+    [SerializeField] private GameObject gameOverUI;
 
-    //this cretes singleton instance of the Lavelmanager
-    public static LevelManager Instance;
+    [Header("Game Scores")]
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI gameOverScore;
+    [SerializeField] private TextMeshProUGUI gameOverHighscore;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
-
-    #endregion
+    [Header("Charge Tracker")]
+    [SerializeField] private TextMeshProUGUI chargeIndicatorText;
 
     [Header ("Game Score Controls")]
-    //Save system for scores. Creating a Serialized class (seperate script: Game Data)
     public int currentGameScore;
-    public GameData gameData; // this refers to the serialized class we made
-    [SerializeField] private TextMeshProUGUI scoreText;
+    //public GameData gameData; // this refers to the serialized class we made
+    public int gameOverHighScore;
 
     [Header ("Game State Controls")]
     //Set to know when game is in play and when in game over states. WIll enable and disable objects as need that are listing to the singleton states
@@ -41,26 +37,15 @@ public class LevelManager : MonoBehaviour
     private PlayerInput playerInput;
     public PlayerController playerController;
 
+    public ObstacleSpawnController obstacleSpawnController;
+
     private void Start()
     {
-        //if we have data then it will load
-        //if not it will create new data
-
-        //loads the save data at the start of the game
-        string loadedData = SaveSystem.Load("save");
-        if (loadedData != null)
-        {
-            //load it back into the game as readable data
-            gameData = JsonUtility.FromJson<GameData>(loadedData);
-        }
-        else
-        {
-            gameData = new GameData();
-        }
-
         playerInput = playerObject.GetComponent<PlayerInput>();
 
         playerController = FindFirstObjectByType<PlayerController>();
+
+        obstacleSpawnController = FindFirstObjectByType<ObstacleSpawnController>();
     }
 
     private void Update()
@@ -69,11 +54,13 @@ public class LevelManager : MonoBehaviour
         {
             EnablePlayerChargeAttack();
         }
+
+        ScoreTextDisplay();
+        ChargeVisualIndicator();
     }
 
     public void StartGame()
-    {
-        onPlay.Invoke();
+    {        
         isPlaying = true;
 
         currentGameScore = 0;
@@ -81,6 +68,8 @@ public class LevelManager : MonoBehaviour
         currentChargeScore = startingChargeScore;
 
         playerInput.enabled = true;
+
+        obstacleSpawnController.ActivateSpawner(isPlaying);
     }
 
     public void GameOver()
@@ -89,13 +78,22 @@ public class LevelManager : MonoBehaviour
 
         playerInput.enabled = false;
 
-        //want game over invoke after other code
-        onGameOver.Invoke();
-    }
+        obstacleSpawnController.DeactivateSpawner(isPlaying);
 
+        gameOverUI.SetActive(true);
+
+        gameOverScore.text = "Score: " + VisualGameScore();
+        gameOverHighscore.text = "Highscore: " + VisualGameHighscore();
+    }
+    
     public void IncreaseGameScore(int points)
     {
         currentGameScore = currentGameScore + points;
+    }
+
+    private void ScoreTextDisplay()
+    {
+        scoreText.text = VisualGameScore();
     }
 
     //Charge score controlls
@@ -120,8 +118,12 @@ public class LevelManager : MonoBehaviour
     {
         return playerController.canCharge = true;
     }
+    private void ChargeVisualIndicator()
+    {
+        chargeIndicatorText.text = VisualChargeTracker();
+    }
 
-    //Converts the timer score to a interget string
+    //Converts the score to a interget string
     public string VisualGameScore()
     {
         return currentGameScore.ToString();
@@ -129,7 +131,7 @@ public class LevelManager : MonoBehaviour
 
     public string VisualGameHighscore()
     {
-        return Mathf.RoundToInt(gameData.highscore).ToString();
+        return gameOverHighScore.ToString();
     }
 
     public string VisualChargeTracker()

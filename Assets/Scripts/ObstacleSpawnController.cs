@@ -21,24 +21,41 @@ public class ObstacleSpawnController : MonoBehaviour
 
     private float timeUntilObstacleSpawn;
 
+    [SerializeField] private LevelManager levelManager;
+
+    [SerializeField] private bool gameInProgress = false;
+
     private void Start()
     {
-        LevelManager.Instance.onGameOver.AddListener(ClearObstacles);
-        LevelManager.Instance.onPlay.AddListener(ResetFactors);
+        levelManager = FindFirstObjectByType<LevelManager>();
     }
 
     private void Update()
-    {
-        if (LevelManager.Instance.isPlaying)
-        {
-            timeAlive += Time.deltaTime;
-
+    {        
+        if (gameInProgress)
+        {            
             CalculateFactors();
-
             ObstacleSpawnLoop();
-        }        
+        }
+        else
+        {
+            ClearObstacles();
+            ResetFactors();
+        }
     }
 
+    //Switch to start spawners
+    public void ActivateSpawner(bool gameState)
+    {
+        gameInProgress = gameState;
+    }
+
+    public void DeactivateSpawner(bool gameState)
+    {
+        gameInProgress = gameState;
+    }
+
+    //Spawn controls
     private void ObstacleSpawnLoop() //can set the timer to a random range
     {
         timeUntilObstacleSpawn += Time.deltaTime;
@@ -50,25 +67,11 @@ public class ObstacleSpawnController : MonoBehaviour
         }
     }
 
-    private void ClearObstacles() //clears all obstacles on death
-    {
-        foreach(Transform child in obstacleParent)
-        {
-            Destroy(child.gameObject);
-        }
-    }
-
     private void CalculateFactors() // ups the difficulty by an equation
     {
+        Debug.Log("Hey");
         currentObstacleSpawnTime = obstacleSpawnTime / Mathf.Pow(timeAlive, obstacleSpawnTimeFactor);
         currentObstacleSpeed = obstacleSpeed * Mathf.Pow(timeAlive, obstacleSpeedFactor);
-    }
-
-    private void ResetFactors() // resets the game to its base factors upon game over / restart
-    {
-        timeAlive = 1f;
-        currentObstacleSpawnTime = obstacleSpawnTime;
-        currentObstacleSpeed = obstacleSpeed;
     }
 
     private void ObstacleSpawn()//Spawns obstacles
@@ -80,5 +83,20 @@ public class ObstacleSpawnController : MonoBehaviour
 
         Rigidbody2D obstacleRB = spawnedObstacle.GetComponent<Rigidbody2D>();
         obstacleRB.linearVelocity = Vector2.left * currentObstacleSpeed;
+    }
+
+    private void ClearObstacles() //clears all obstacles on death
+    {
+        foreach (Transform child in obstacleParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    private void ResetFactors() // resets the game to its base factors upon game over / restart
+    {
+        timeAlive = 1f;
+        currentObstacleSpawnTime = obstacleSpawnTime;
+        currentObstacleSpeed = obstacleSpeed;
     }
 }
