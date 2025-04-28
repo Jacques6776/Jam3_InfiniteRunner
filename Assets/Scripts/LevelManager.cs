@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {    
@@ -10,12 +11,14 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject gameOverUI;
 
     [Header("Game Scores")]
+    [SerializeField] private TextMeshProUGUI startScreenScore;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI gameOverScore;
     [SerializeField] private TextMeshProUGUI gameOverHighscore;
 
     [Header("Charge Tracker")]
-    [SerializeField] private TextMeshProUGUI chargeIndicatorText;
+    //[SerializeField] private TextMeshProUGUI chargeIndicatorText;
+    [SerializeField] private Slider chargeSlider;
 
     [Header ("Game Score Controls")]
     public int currentGameScore;
@@ -31,7 +34,7 @@ public class LevelManager : MonoBehaviour
     [Header("Charge Attack Tracker")]
     [SerializeField] private int startingChargeScore = 0;
     [SerializeField] private int activationChargeScore = 10;
-    [SerializeField] private int currentChargeScore;
+    [SerializeField] private int currentChargeScore;    
 
     public GameObject playerObject;
     private PlayerInput playerInput;
@@ -46,6 +49,9 @@ public class LevelManager : MonoBehaviour
         playerController = FindFirstObjectByType<PlayerController>();
 
         obstacleSpawnController = FindFirstObjectByType<ObstacleSpawnController>();
+
+        chargeSlider.maxValue = activationChargeScore;
+        chargeSlider.value = currentChargeScore;
     }
 
     private void Update()
@@ -56,11 +62,20 @@ public class LevelManager : MonoBehaviour
         }
 
         ScoreTextDisplay();
-        ChargeVisualIndicator();
+
+        startScreenScore.text = "Highscore: " + PlayerPrefs.GetInt("SavedHighScore").ToString();
+
+        chargeSlider.value = currentChargeScore;
     }
 
+    //game states
     public void StartGame()
     {        
+        if(playerObject.activeInHierarchy == false)
+        {
+            playerObject.SetActive(true);
+        }
+        
         isPlaying = true;
 
         currentGameScore = 0;
@@ -82,10 +97,13 @@ public class LevelManager : MonoBehaviour
 
         gameOverUI.SetActive(true);
 
-        gameOverScore.text = "Score: " + VisualGameScore();
-        gameOverHighscore.text = "Highscore: " + VisualGameHighscore();
+        HighScoreUpdate();
+
+        gameOverScore.text = "Score: " + currentGameScore.ToString();
+        gameOverHighscore.text = "Highscore: " + PlayerPrefs.GetInt("SavedHighScore").ToString();
     }
     
+    //active game score tracking
     public void IncreaseGameScore(int points)
     {
         currentGameScore = currentGameScore + points;
@@ -93,7 +111,27 @@ public class LevelManager : MonoBehaviour
 
     private void ScoreTextDisplay()
     {
-        scoreText.text = VisualGameScore();
+        scoreText.text = currentGameScore.ToString();
+    }
+
+    //game high score
+    public void HighScoreUpdate()
+    {
+        //check if there is a high score
+        if(PlayerPrefs.HasKey("SavedHighScore"))
+        {
+            //if score is higher
+            if(currentGameScore > PlayerPrefs.GetInt("SavedHighScore"))
+            {
+                //Set the new high score
+                PlayerPrefs.SetInt("SavedHighScore", currentGameScore);
+            }
+        }
+        else
+        {
+            //if no score yet set
+            PlayerPrefs.SetInt("SavedHighScore", currentGameScore); ;
+        }
     }
 
     //Charge score controlls
@@ -117,25 +155,5 @@ public class LevelManager : MonoBehaviour
     private bool EnablePlayerChargeAttack()
     {
         return playerController.canCharge = true;
-    }
-    private void ChargeVisualIndicator()
-    {
-        chargeIndicatorText.text = VisualChargeTracker();
-    }
-
-    //Converts the score to a interget string
-    public string VisualGameScore()
-    {
-        return currentGameScore.ToString();
-    }
-
-    public string VisualGameHighscore()
-    {
-        return gameOverHighScore.ToString();
-    }
-
-    public string VisualChargeTracker()
-    {
-        return currentChargeScore.ToString();
     }
 }

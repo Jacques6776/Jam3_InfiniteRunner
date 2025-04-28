@@ -31,7 +31,9 @@ public class ObstacleSpawnController : MonoBehaviour
     }
 
     private void Update()
-    {        
+    {
+        timeAlive += Time.deltaTime;
+        
         if (gameInProgress)
         {            
             CalculateFactors();
@@ -69,7 +71,6 @@ public class ObstacleSpawnController : MonoBehaviour
 
     private void CalculateFactors() // ups the difficulty by an equation
     {
-        Debug.Log("Hey");
         currentObstacleSpawnTime = obstacleSpawnTime / Mathf.Pow(timeAlive, obstacleSpawnTimeFactor);
         currentObstacleSpeed = obstacleSpeed * Mathf.Pow(timeAlive, obstacleSpeedFactor);
     }
